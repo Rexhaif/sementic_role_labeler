@@ -5,6 +5,7 @@ import spacy_udpipe
 import re
 from yargy.tokenizer import Tokenizer, RULES
 from pymorphy2 import MorphAnalyzer
+from functools import lru_cache
 class UdCase(Case):
     
     def __init__(self, grams):
@@ -87,6 +88,7 @@ class MorphImitator():
         '''
         pass
     
+    @lru_cache(maxsize=100000)
     def normalized(self, word):
         parse = self.morph.parse(word)
         return {_.normal_form for _ in parse}
@@ -120,7 +122,7 @@ class UdMorphTokenizer(Tokenizer):
             
     def get_morph(self, token):
         pos = token.pos_
-        norm = token.norm_
+        norm = token.lemma_
         features = set(token.morph.to_dict().values())
         features.add(pos)
         grams = UdGrams(features)
